@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0f4a12"/>
+<title>ODNIS — Créer mon compte</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --g1:#062b06;--g2:#0f4a12;--g3:#1e7a22;--g4:#2ea832;--g5:#5cb85c;
+  --g6:#a8d8a8;--g7:#e8f5e8;--g8:#f4fbf4;
+  --text:#0d2b0d;--muted:#4a6e4a;--border:#cce8cc;
+  --red:#c0392b;--orange:#e67e22;--blue:#1565c0;
+  --safe-top:env(safe-area-inset-top,44px);
+  --safe-bottom:env(safe-area-inset-bottom,34px);
+}
+html,body{height:100%;font-family:-apple-system,'Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{background:var(--g8);color:var(--text);min-height:100dvh;display:flex;justify-content:center}
+.app{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;background:var(--g8)}
+.status-bar{height:var(--safe-top);min-height:44px;background:var(--g2)}
+.topbar{background:linear-gradient(90deg,var(--g1),var(--g2) 50%,var(--g3));height:52px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.topbar-logo{font-size:19px;font-weight:800;color:#fff;letter-spacing:3px;cursor:pointer}
+.tb-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+.tb-btn:active{background:rgba(255,255,255,.25)}
+.topbar-step{font-size:12px;color:var(--g6)}
+
+/* PROGRESS */
+.progress{height:4px;background:var(--g1)}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--g4),var(--g5));transition:width .4s}
+
+/* SCROLL */
+.scroll-area{flex:1;overflow-y:auto;padding:14px 12px;padding-bottom:calc(80px + var(--safe-bottom))}
+
+/* STEPS */
+.steps-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.steps-row::-webkit-scrollbar{display:none}
+.step-chip{flex-shrink:0;padding:0 12px;height:28px;border-radius:20px;border:1.5px solid var(--border);background:var(--g8);font-size:11px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px}
+.step-chip.done{background:var(--g7);border-color:var(--g4);color:var(--g2)}
+.step-chip.active{background:var(--g3);border-color:var(--g3);color:#fff}
+
+/* SECTION CARD */
+.scard{background:#fff;border-radius:14px;border:1px solid var(--border);box-shadow:0 2px 10px rgba(10,61,10,.1);overflow:hidden;margin-bottom:12px}
+.scard-head{background:linear-gradient(90deg,var(--g1),var(--g2) 50%,var(--g3));padding:10px 13px}
+.scard-title{font-size:13px;font-weight:700;color:#fff}
+.scard-body{padding:14px}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
+.field:last-child{margin-bottom:0}
+.field-label{font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.req{color:var(--red);font-size:10px}
+.vis{font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:auto}
+.vis.pub{background:#e8f5e8;color:var(--g2);border:1px solid var(--g4)}
+.vis.priv{background:#fde8e7;color:var(--red);border:1px solid #e8b4b0}
+.fi{border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:14px;color:var(--text);background:#fff;font-family:inherit;outline:none;width:100%}
+.fi:focus{border-color:var(--g4);box-shadow:0 0 0 3px rgba(46,168,50,.1)}
+.fi.pub{border-left:3px solid var(--g4);background:#f0faf0}
+.fi.priv{border-left:3px solid var(--red);background:#fff8f8}
+.fi.err{border-color:var(--red)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.span2{grid-column:1/-1}
+
+/* RADIO / CHECK BUTTONS */
+.opt-row{display:flex;flex-wrap:wrap;gap:6px}
+.radio-opt,.check-opt{display:inline-flex;align-items:center;gap:5px;background:var(--g7);border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--g2);transition:all .12s;user-select:none}
+.radio-opt input,.check-opt input{display:none}
+.radio-opt.sel,.check-opt.sel{background:var(--g3);border-color:var(--g3);color:#fff}
+
+/* BLOOD GROUP */
+.blood-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.blood-btn{padding:8px;text-align:center;background:var(--g7);border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:var(--g2);transition:all .12s}
+.blood-btn.sel{background:var(--red);border-color:var(--red);color:#fff}
+
+/* INSURANCE */
+.ins-list{display:flex;flex-direction:column;gap:6px}
+.ins-item{display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--g7);border-radius:8px;border:1.5px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--g2)}
+.ins-item.sel{background:var(--g3);border-color:var(--g3);color:#fff}
+.ins-item input{width:15px;height:15px;accent-color:#fff;flex-shrink:0}
+
+/* LEGEND */
+.legend{display:flex;gap:10px;padding:8px 10px;background:#fff;border-radius:9px;border:1px solid var(--border);margin-bottom:10px;font-size:11px}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* CGU */
+.cgu-item{display:flex;align-items:flex-start;gap:8px;padding:9px;background:var(--g7);border-radius:8px;border:1.5px solid var(--border);margin-bottom:7px;cursor:pointer;font-size:12px;color:var(--text);line-height:1.5}
+.cgu-item input{width:16px;height:16px;accent-color:var(--g3);flex-shrink:0;margin-top:1px}
+
+/* STEP PAGES */
+.step-page{display:none}.step-page.active{display:block}
+
+/* NAV BUTTONS */
+.nav-btns{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:10px 12px;padding-bottom:calc(10px + var(--safe-bottom));display:flex;gap:8px;z-index:200}
+.btn-back{flex:1;background:var(--g7);color:var(--g2);border:1.5px solid var(--border);border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-back:active{background:var(--g6)}
+.btn-next{flex:2;background:linear-gradient(90deg,var(--g1),var(--g2) 50%,var(--g3));color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-next:active{opacity:.85}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);width:calc(100% - 32px);max-width:398px;background:var(--g1);color:#fff;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:1000;opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="status-bar"></div>
+<div class="topbar">
+  <button class="tb-btn" onclick="goBack()">Retour</button>
+  <span class="topbar-logo" onclick="window.location.href='index.html'">ODNIS</span>
+  <span class="topbar-step" id="stepLabel">Étape 1/4</span>
+</div>
+<div class="progress"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+
+<div class="scroll-area">
+
+  <!-- ÉTAPES INDICATEURS -->
+  <div class="steps-row">
+    <div class="step-chip active" id="sc1">Connexion</div>
+    <div class="step-chip" id="sc2">Identité</div>
+    <div class="step-chip" id="sc3">Adresse & Contact</div>
+    <div class="step-chip" id="sc4">Médical & CGU</div>
+  </div>
+
+  <!-- LÉGENDE -->
+  <div class="legend">
+    <div style="display:flex;align-items:center;gap:5px"><div class="leg-dot" style="background:var(--g4)"></div>Visible pharmacies</div>
+    <div style="display:flex;align-items:center;gap:5px"><div class="leg-dot" style="background:var(--red)"></div>Visible vous seul</div>
+  </div>
+
+  <!-- ÉTAPE 1 — CONNEXION -->
+  <div class="step-page active" id="sp1">
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Informations de connexion</div></div>
+      <div class="scard-body">
+        <div class="field">
+          <div class="field-label">Email <span class="req">*</span><span class="vis priv">Privé</span></div>
+          <input class="fi priv" type="email" id="f-email" placeholder="m.benali@email.com" autocomplete="email"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Mot de passe <span class="req">*</span><span class="vis priv">Privé</span></div>
+          <input class="fi priv" type="password" id="f-pwd" placeholder="Minimum 8 caractères"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Confirmer le mot de passe <span class="req">*</span></div>
+          <input class="fi priv" type="password" id="f-pwd2" placeholder="Répétez votre mot de passe"/>
+        </div>
+        <div class="grid2" style="margin-top:4px">
+          <div class="field">
+            <div class="field-label">N° Chifa<span class="vis pub">Public</span></div>
+            <input class="fi pub" id="f-chifa" placeholder="164031624592" maxlength="12"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Pseudonyme<span class="vis priv">Privé</span></div>
+            <input class="fi priv" id="f-pseudo" placeholder="Moun_8756"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Assurance maladie</div></div>
+      <div class="scard-body">
+        <div class="ins-list">
+          <div class="ins-item" onclick="toggleIns(this)"><input type="checkbox"/> CNAS — Caisse nationale des assurances sociales</div>
+          <div class="ins-item" onclick="toggleIns(this)"><input type="checkbox"/> CASNOS — Non-salariés</div>
+          <div class="ins-item" onclick="toggleIns(this)"><input type="checkbox"/> MIFA — Militaires</div>
+          <div class="ins-item" onclick="toggleIns(this)"><input type="checkbox"/> MGF — Fonctionnaires</div>
+          <div class="ins-item" onclick="toggleIns(this)"><input type="checkbox"/> Aucune assurance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 — IDENTITÉ -->
+  <div class="step-page" id="sp2">
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Identité personnelle</div></div>
+      <div class="scard-body">
+        <div class="grid2">
+          <div class="field">
+            <div class="field-label">Nom <span class="req">*</span><span class="vis pub">Public</span></div>
+            <input class="fi pub" id="f-nom" placeholder="ALGEROIS" style="text-transform:uppercase"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Prénom <span class="req">*</span><span class="vis pub">Public</span></div>
+            <input class="fi pub" id="f-prenom" placeholder="Mounir"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Date de naissance <span class="req">*</span><span class="vis pub">Public</span></div>
+            <input class="fi pub" id="f-ddn" type="date"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Genre <span class="req">*</span></div>
+            <div class="opt-row">
+              <label class="radio-opt" onclick="selRadio(this,'genre')"><input type="radio" name="genre" value="Masculin"/> Masculin</label>
+              <label class="radio-opt" onclick="selRadio(this,'genre')"><input type="radio" name="genre" value="Féminin"/> Féminin</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Groupe sanguin</div></div>
+      <div class="scard-body">
+        <div class="blood-grid">
+          <div class="blood-btn" onclick="selBlood(this)">A+</div>
+          <div class="blood-btn" onclick="selBlood(this)">A−</div>
+          <div class="blood-btn" onclick="selBlood(this)">B+</div>
+          <div class="blood-btn" onclick="selBlood(this)">B−</div>
+          <div class="blood-btn" onclick="selBlood(this)">AB+</div>
+          <div class="blood-btn" onclick="selBlood(this)">AB−</div>
+          <div class="blood-btn" onclick="selBlood(this)">O+</div>
+          <div class="blood-btn" onclick="selBlood(this)">O−</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Données physiques</div></div>
+      <div class="scard-body">
+        <div class="grid2">
+          <div class="field">
+            <div class="field-label">Poids (kg)<span class="vis pub">Public</span></div>
+            <input class="fi pub" id="f-poids" type="number" placeholder="78"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Taille<span class="vis pub">Public</span></div>
+            <input class="fi pub" id="f-taille" placeholder="1m 75"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 — ADRESSE & CONTACT -->
+  <div class="step-page" id="sp3">
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Adresse</div></div>
+      <div class="scard-body">
+        <div class="field">
+          <div class="field-label">Adresse<span class="vis priv">Privé</span></div>
+          <input class="fi priv" id="f-adresse" placeholder="23 Rue Didouche Mourad"/>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <div class="field-label">Code postal<span class="vis priv">Privé</span></div>
+            <input class="fi priv" id="f-cp" placeholder="16035" maxlength="5"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Commune<span class="vis priv">Privé</span></div>
+            <input class="fi priv" id="f-commune" placeholder="Draria"/>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Wilaya <span class="req">*</span><span class="vis pub">Public</span></div>
+          <select class="fi pub" id="f-wilaya">
+            <option value="">Choisir une wilaya</option>
+            <option>01 — Adrar</option><option>02 — Chlef</option><option>03 — Laghouat</option>
+            <option>04 — Oum El Bouaghi</option><option>05 — Batna</option><option>06 — Béjaïa</option>
+            <option>07 — Biskra</option><option>08 — Béchar</option><option>09 — Blida</option>
+            <option>10 — Bouïra</option><option>11 — Tamanrasset</option><option>12 — Tébessa</option>
+            <option>13 — Tlemcen</option><option>14 — Tiaret</option><option>15 — Tizi Ouzou</option>
+            <option selected>16 — Alger</option><option>17 — Djelfa</option><option>18 — Jijel</option>
+            <option>19 — Sétif</option><option>25 — Constantine</option><option>31 — Oran</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Contact</div></div>
+      <div class="scard-body">
+        <div class="grid2">
+          <div class="field">
+            <div class="field-label">Mobile <span class="req">*</span><span class="vis priv">Privé</span></div>
+            <input class="fi priv" id="f-mobile" type="tel" placeholder="+213 71245909"/>
+          </div>
+          <div class="field">
+            <div class="field-label">WhatsApp<span class="vis priv">Privé</span></div>
+            <input class="fi priv" id="f-wa" type="tel" placeholder="+213 71245909"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Médecin traitant</div></div>
+      <div class="scard-body">
+        <div class="grid2">
+          <div class="field">
+            <div class="field-label">Nom du médecin<span class="vis priv">Privé</span></div>
+            <input class="fi priv" id="f-med-nom" placeholder="Dr. Karim Benali"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Téléphone<span class="vis priv">Privé</span></div>
+            <input class="fi priv" id="f-med-tel" type="tel" placeholder="+213 21 XX XX XX"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 — MÉDICAL & CGU -->
+  <div class="step-page" id="sp4">
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Informations médicales</div></div>
+      <div class="scard-body">
+        <div class="field">
+          <div class="field-label">Allergies<span class="vis pub">Public</span></div>
+          <input class="fi pub" id="f-allergies" placeholder="Ex : Gluten, Arachide (optionnel)"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Maladies chroniques<span class="vis pub">Public</span></div>
+          <input class="fi pub" id="f-chronique" placeholder="Ex : Diabète, hypertension (optionnel)"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Antécédents<span class="vis pub">Public</span></div>
+          <input class="fi pub" id="f-cancer" placeholder="Ex : Cancer du Côlon (optionnel)"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Notes personnelles<span class="vis priv">Privé</span></div>
+          <textarea class="fi priv" id="f-notes" rows="3" placeholder="Informations complémentaires pour votre usage personnel (optionnel)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Conditions d'utilisation</div></div>
+      <div class="scard-body">
+        <div class="cgu-item" onclick="toggleCgu(this)">
+          <input type="checkbox" id="cgu1"/>
+          J'accepte les <strong>Conditions Générales d'Utilisation</strong> et la Politique de Confidentialité ODNIS.
+        </div>
+        <div class="cgu-item" onclick="toggleCgu(this)">
+          <input type="checkbox" id="cgu2"/>
+          J'accepte que mes données médicales marquées <strong>"Public"</strong> soient partagées avec les prestataires de santé ODNIS.
+        </div>
+        <div class="cgu-item" onclick="toggleCgu(this)">
+          <input type="checkbox" id="cgu3"/>
+          J'accepte de recevoir des notifications liées à mes demandes et rendez-vous.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end scroll-area -->
+
+<!-- NAV BUTTONS -->
+<div class="nav-btns">
+  <button class="btn-back" id="btnBack" onclick="goBack()" style="display:none">Précédent</button>
+  <button class="btn-next" id="btnNext" onclick="goNext()">Suivant →</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let curStep = 1;
+const totalSteps = 4;
+
+function updateUI(){
+  // Pages
+  for(let i=1;i<=totalSteps;i++){
+    document.getElementById('sp'+i).classList.toggle('active', i===curStep);
+    const sc = document.getElementById('sc'+i);
+    sc.classList.remove('active','done');
+    if(i<curStep) sc.classList.add('done');
+    else if(i===curStep) sc.classList.add('active');
+  }
+  // Progress
+  document.getElementById('progressFill').style.width = (curStep/totalSteps*100)+'%';
+  document.getElementById('stepLabel').textContent = 'Étape '+curStep+'/'+totalSteps;
+  // Buttons
+  document.getElementById('btnBack').style.display = curStep>1 ? '' : 'none';
+  document.getElementById('btnNext').textContent = curStep===totalSteps ? 'Créer mon compte ✓' : 'Suivant →';
+  // Scroll top
+  document.querySelector('.scroll-area').scrollTop = 0;
+}
+
+function goNext(){
+  if(curStep===totalSteps){ submitForm(); return; }
+  curStep++; updateUI();
+}
+
+function goBack(){
+  if(curStep===1){ window.location.href='index.html'; return; }
+  curStep--; updateUI();
+}
+
+function submitForm(){
+  const cgu1=document.getElementById('cgu1').checked;
+  const cgu2=document.getElementById('cgu2').checked;
+  if(!cgu1||!cgu2){ showToast('Veuillez accepter les conditions obligatoires'); return; }
+  showToast('Compte créé avec succès ! Bienvenue sur ODNIS ✓');
+  setTimeout(()=>{ window.location.href='dashboard-ios.html'; }, 1500);
+}
+
+// Radio select
+function selRadio(el, name){
+  document.querySelectorAll('[name='+name+']').forEach(r=>r.closest('.radio-opt').classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// Blood select
+function selBlood(el){
+  document.querySelectorAll('.blood-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// Insurance toggle
+function toggleIns(el){
+  el.classList.toggle('sel');
+  el.querySelector('input').checked = el.classList.contains('sel');
+}
+
+// CGU toggle
+function toggleCgu(el){
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+}
+
+// Toast
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('/ODNIS-IOS/service-worker.js').catch(()=>{})); }
+</script>
+</body>
+</html>

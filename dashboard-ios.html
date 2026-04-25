@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0f4a12"/>
+<title>ODNIS — Mon Tableau de Bord</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --g1:#062b06;--g2:#0f4a12;--g3:#1e7a22;--g4:#2ea832;--g5:#5cb85c;
+  --g6:#a8d8a8;--g7:#e8f5e8;--g8:#f4fbf4;
+  --text:#0d2b0d;--muted:#4a6e4a;--border:#cce8cc;
+  --red:#c0392b;--orange:#e67e22;--blue:#1565c0;--purple:#6d3b8c;
+  --samu:#d32f2f;
+  --safe-top:env(safe-area-inset-top,44px);
+  --safe-bottom:env(safe-area-inset-bottom,34px);
+  --shadow:0 2px 12px rgba(10,61,10,.11);
+}
+html,body{height:100%;font-family:-apple-system,'Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{background:var(--g8);color:var(--text);min-height:100dvh;display:flex;justify-content:center}
+.app{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;background:var(--g8)}
+.status-bar{height:var(--safe-top);min-height:44px;background:var(--g2)}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(90deg,var(--g1),var(--g2) 50%,var(--g3));height:52px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.samu-btn{background:var(--samu);color:#fff;border:none;border-radius:7px;padding:0 9px;height:28px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px}
+.samu-btn:active{transform:scale(.93)}
+.topbar-logo{font-size:19px;font-weight:800;color:#fff;letter-spacing:3px;cursor:pointer}
+.topbar-right{display:flex;gap:6px}
+.tb-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+.tb-btn:active{background:rgba(255,255,255,.25)}
+.tb-btn.danger{background:rgba(192,57,43,.3);border-color:rgba(192,57,43,.5);color:#ffb3b3}
+.notif-badge{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;font-weight:700;margin-left:4px}
+
+/* SCROLL AREA */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(64px + var(--safe-bottom))}
+
+/* PROFILE CARD */
+.profile-card{background:linear-gradient(135deg,var(--g1),var(--g2) 60%,var(--g3));padding:16px 14px;display:flex;align-items:center;gap:12px}
+.avatar{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;border:2.5px solid rgba(255,255,255,.5);flex-shrink:0}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-size:15px;font-weight:800;color:#fff}
+.profile-email{font-size:11px;color:var(--g6);margin-top:1px}
+.profile-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.p-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px}
+.p-tag.blood{background:rgba(192,57,43,.3);color:#ffb3b3;border:1px solid rgba(192,57,43,.4)}
+.p-tag.allergy{background:rgba(230,126,34,.3);color:#ffd5a8;border:1px solid rgba(230,126,34,.4)}
+.p-tag.chron{background:rgba(21,101,192,.3);color:#b3d4ff;border:1px solid rgba(21,101,192,.4)}
+.profile-edit{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+.profile-edit:active{background:rgba(255,255,255,.28)}
+.chifa-strip{background:rgba(0,0,0,.2);padding:7px 14px;font-size:11px;color:var(--g6);font-family:'Courier New',monospace}
+.chifa-strip span{font-weight:700;color:#fff;letter-spacing:.8px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:12px 10px;background:#fff;border-bottom:1px solid var(--border)}
+.stat-card{background:var(--g8);border-radius:10px;border:1px solid var(--border);padding:10px 4px;text-align:center;cursor:pointer}
+.stat-card:active{transform:scale(.94);background:var(--g7)}
+.stat-num{font-size:20px;font-weight:900;line-height:1}
+.stat-lbl{font-size:8px;color:var(--muted);margin-top:2px;font-weight:600;text-transform:uppercase}
+.s-green .stat-num{color:var(--g3)}.s-blue .stat-num{color:var(--blue)}.s-orange .stat-num{color:var(--orange)}.s-red .stat-num{color:var(--red)}.s-purple .stat-num{color:var(--purple)}
+
+/* SECTION NAV PILLS */
+.section-tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:#fff;border-bottom:1px solid var(--border);scrollbar-width:none}
+.section-tabs::-webkit-scrollbar{display:none}
+.stab{flex-shrink:0;padding:0 12px;height:30px;border-radius:20px;border:1.5px solid var(--border);background:var(--g8);font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit}
+.stab.active{background:var(--g3);border-color:var(--g3);color:#fff}
+.stab:active{transform:scale(.96)}
+.stab-cnt{background:rgba(255,255,255,.3);border-radius:8px;padding:1px 5px;font-size:9px;font-weight:700}
+.stab:not(.active) .stab-cnt{background:var(--red);color:#fff}
+
+/* SECTION CONTENT */
+.sections{padding:12px}
+.sec{display:none}.sec.active{display:flex;flex-direction:column;gap:10px}
+
+/* CARD */
+.card{background:#fff;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.card-head{background:linear-gradient(90deg,var(--g1),var(--g2) 50%,var(--g3));padding:9px 13px;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:12px;font-weight:700;color:#fff}
+.card-btn{font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-family:inherit}
+.card-btn:active{background:rgba(255,255,255,.25)}
+.card-body{padding:12px}
+
+/* ITEMS */
+.item-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.item-row:last-child{border-bottom:none}
+.item-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.item-dot.green{background:var(--g3)}.item-dot.blue{background:var(--blue)}.item-dot.red{background:var(--red)}.item-dot.orange{background:var(--orange)}.item-dot.purple{background:var(--purple)}
+.item-info{flex:1}
+.item-title{font-size:13px;font-weight:700}
+.item-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.item-actions{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.i-btn{font-size:10px;padding:4px 9px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:var(--g7);color:var(--g2);font-family:inherit;font-weight:600}
+.i-btn:active{background:var(--g6)}
+.i-btn.red{background:#fff3f3;color:var(--red);border-color:#e8b4b0}
+.item-right{flex-shrink:0;text-align:right}
+.status{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;display:block}
+.status.blue{background:#e3f2fd;color:var(--blue);border:1px solid #90caf9}
+.status.green{background:var(--g7);color:var(--g2);border:1px solid var(--g4)}
+.status.orange{background:#fff3e0;color:#bf360c;border:1px solid #ffcc80}
+.status.red{background:#fde8e7;color:var(--red);border:1px solid #e8b4b0}
+.item-date{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* ALERT */
+.alert{background:var(--g7);border:1.5px solid var(--g4);border-radius:11px;padding:11px 13px;font-size:12px;color:var(--g1);line-height:1.6;display:flex;align-items:flex-start;gap:8px}
+.alert-close{background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);flex-shrink:0;margin-left:auto}
+
+/* SEARCH ITEMS */
+.srch-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--g8);border-radius:9px;margin-bottom:6px;border:1px solid var(--border)}
+.srch-item:active{background:var(--g7)}
+.srch-dot{width:7px;height:7px;border-radius:50%;background:var(--g3);flex-shrink:0}
+.srch-info{flex:1;min-width:0}
+.srch-text{font-size:12px;font-weight:600;color:var(--g1)}
+.srch-params{font-size:10px;color:var(--muted)}
+.srch-btns{display:flex;gap:4px;flex-shrink:0}
+.s-btn{font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--g2);font-family:inherit;font-weight:600}
+.s-btn.red{color:var(--red);border-color:#e8b4b0}
+
+/* FAV ITEMS */
+.fav-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.fav-item:last-child{border-bottom:none}
+.fav-color{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+.fav-color.pharm{background:var(--g3)}.fav-color.garde{background:var(--red)}.fav-color.clinique{background:var(--blue)}.fav-color.para{background:var(--orange)}.fav-color.veto{background:var(--purple)}
+.fav-info{flex:1}
+.fav-name{font-size:13px;font-weight:700}
+.fav-type{font-size:10px;font-weight:600;color:var(--g3);margin-top:1px}
+.fav-addr{font-size:10px;color:var(--muted)}
+.fav-remove{font-size:10px;padding:4px 9px;border-radius:6px;cursor:pointer;border:1px solid #e8b4b0;background:#fff3f3;color:var(--red);font-family:inherit;font-weight:600;flex-shrink:0}
+
+/* CAL */
+.cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-btn{background:var(--g7);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--g2);cursor:pointer;font-family:inherit}
+.cal-month-lbl{font-size:14px;font-weight:700;color:var(--g1)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px}
+.cal-dow{font-size:9px;font-weight:700;text-align:center;color:var(--muted);padding:3px 0;text-transform:uppercase}
+.cal-day{font-size:12px;padding:7px 0;border-radius:8px;text-align:center;cursor:pointer;color:var(--text);border:1px solid transparent;position:relative}
+.cal-day.today{font-weight:700;color:var(--g2);border-color:var(--g4)}
+.cal-day.selected{background:var(--g3);color:#fff}
+.cal-day.empty,.cal-day.past{color:#ccc;cursor:default}
+.cal-day.has-rdv::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--red)}
+.time-slots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tslot{background:var(--g7);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--g2)}
+.tslot.selected{background:var(--g3);color:#fff;border-color:var(--g3)}
+.rdv-confirm-btn{width:100%;background:linear-gradient(90deg,var(--g1),var(--g2) 50%,var(--g3));color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* MSG */
+.msg-form{background:var(--g7);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--border)}
+.msg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.msg-lbl{font-size:11px;font-weight:700;color:var(--muted);width:50px;flex-shrink:0}
+.msg-inp{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;outline:none;background:#fff}
+.msg-inp:focus{border-color:var(--g4)}
+.msg-send{background:var(--g3);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.msg-item{display:flex;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
+.msg-item:last-child{border-bottom:none}
+.msg-avatar{width:34px;height:34px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.msg-body{flex:1}
+.msg-from{font-size:12px;font-weight:700;color:var(--text)}
+.msg-text{font-size:11px;color:var(--muted);margin-top:2px}
+.msg-time{font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.msg-unread .msg-from{color:var(--g2)}
+
+/* HEALTH */
+.hw-card{background:var(--g8);border-radius:10px;border:1px solid var(--border);padding:10px 12px;margin-bottom:6px}
+.hw-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.hw-value{font-size:20px;font-weight:800;color:var(--g1)}
+.hw-unit{font-size:11px;color:var(--muted)}
+.hw-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-info{flex:1;min-width:0;margin-right:10px}
+.setting-label{font-size:13px;font-weight:600;color:var(--text)}
+.setting-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.toggle{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:22px;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--g3)}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle input:checked+.toggle-slider::before{transform:translateX(16px)}
+
+/* NOTIFS */
+.notif-item{display:flex;gap:9px;padding:10px 0;border-bottom:1px solid var(--border)}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.notif-txt{flex:1}
+.notif-title{font-size:12px;font-weight:700;color:var(--text)}
+.notif-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.notif-time{font-size:10px;color:var(--muted);flex-shrink:0}
+
+/* ORD */
+.ord-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ord-item:last-child{border-bottom:none}
+.ord-color{width:10px;height:36px;border-radius:4px;flex-shrink:0}
+.ord-info{flex:1}
+.ord-title{font-size:13px;font-weight:700}
+.ord-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:var(--safe-bottom);display:flex;justify-content:space-around;padding-top:6px;z-index:300}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;cursor:pointer;padding:4px 0;border:none;background:none}
+.bnav-item:active{transform:scale(.9)}
+.bnav-svg{width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bnav-label{font-size:9px;font-weight:500;color:var(--muted)}
+.bnav-item.active .bnav-svg{stroke:var(--g3)}
+.bnav-item.active .bnav-label{color:var(--g3);font-weight:700}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(64px + var(--safe-bottom) + 10px);left:50%;transform:translateX(-50%) translateY(20px);width:calc(100% - 32px);max-width:398px;background:var(--g1);color:#fff;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:1000;opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center}
+.sheet-overlay.open{display:flex}
+.sheet{background:#fff;border-radius:22px 22px 0 0;width:100%;max-width:430px;padding-bottom:var(--safe-bottom);animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:10px auto 0}
+.sheet-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.sheet-title{font-size:15px;font-weight:700;color:var(--g1)}
+.sheet-close{width:26px;height:26px;border-radius:50%;background:var(--g7);border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.sheet-body{padding:14px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="status-bar"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="samu-btn" onclick="callSamu()">
+      <span style="filter:brightness(0) invert(1);font-size:12px">📞</span> 14 SAMU
+    </button>
+    <span class="topbar-logo" onclick="window.location.href='index.html'">ODNIS</span>
+  </div>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="showTab('messages')">Messages <span class="notif-badge">2</span></button>
+    <button class="tb-btn danger" onclick="confirmLogout()">Déconnexion</button>
+  </div>
+</div>
+
+<div class="scroll-area">
+
+  <!-- PROFILE -->
+  <div class="profile-card">
+    <div class="avatar" id="userAvatar">MB</div>
+    <div class="profile-info">
+      <div class="profile-name" id="userName">Mohamed Ben Ali</div>
+      <div class="profile-email" id="userEmail">m.benali@email.com</div>
+      <div class="profile-tags">
+        <span class="p-tag blood">B+</span>
+        <span class="p-tag allergy">Pénicilline</span>
+        <span class="p-tag chron">Hypertension</span>
+      </div>
+    </div>
+    <button class="profile-edit" onclick="window.location.href='create-account-ios.html'">Modifier</button>
+  </div>
+  <div class="chifa-strip">N° Chifa : <span id="chifaNum">164 031 624 592</span></div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card s-green" onclick="showTab('demandes')"><div class="stat-num">3</div><div class="stat-lbl">Demandes</div></div>
+    <div class="stat-card s-blue" onclick="showTab('calendrier')"><div class="stat-num">2</div><div class="stat-lbl">RDV</div></div>
+    <div class="stat-card s-orange" onclick="showTab('favoris')"><div class="stat-num">5</div><div class="stat-lbl">Favoris</div></div>
+    <div class="stat-card s-red" onclick="showTab('messages')"><div class="stat-num">2</div><div class="stat-lbl">Messages</div></div>
+    <div class="stat-card s-purple" onclick="showTab('ordonnances')"><div class="stat-num">1</div><div class="stat-lbl">Ord.</div></div>
+  </div>
+
+  <!-- SECTION TABS -->
+  <div class="section-tabs">
+    <button class="stab active" id="tab-vue" onclick="showTab('vue')">Vue d'ensemble</button>
+    <button class="stab" id="tab-demandes" onclick="showTab('demandes')">Demandes <span class="stab-cnt">3</span></button>
+    <button class="stab" id="tab-calendrier" onclick="showTab('calendrier')">Calendrier <span class="stab-cnt">2</span></button>
+    <button class="stab" id="tab-recherches" onclick="showTab('recherches')">Recherches <span class="stab-cnt">4</span></button>
+    <button class="stab" id="tab-favoris" onclick="showTab('favoris')">Favoris <span class="stab-cnt">5</span></button>
+    <button class="stab" id="tab-messages" onclick="showTab('messages')">Messages <span class="stab-cnt">2</span></button>
+    <button class="stab" id="tab-ordonnances" onclick="showTab('ordonnances')">Ordonnances</button>
+    <button class="stab" id="tab-sante" onclick="showTab('sante')">Santé</button>
+    <button class="stab" id="tab-notifs" onclick="showTab('notifs')">Notifs <span class="stab-cnt">3</span></button>
+    <button class="stab" id="tab-params" onclick="showTab('params')">Paramètres</button>
+  </div>
+
+  <div class="sections">
+
+    <!-- VUE D'ENSEMBLE -->
+    <div class="sec active" id="sec-vue">
+      <div class="alert">
+        Bienvenue Mohamed ! Votre profil est complet à <strong>85%</strong>. Ajoutez votre médecin traitant pour finaliser.
+        <button class="alert-close" onclick="this.closest('.alert').remove()">✕</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Demandes récentes</span><button class="card-btn" onclick="showTab('demandes')">Voir tout</button></div>
+        <div class="card-body">
+          <div class="item-row">
+            <div class="item-dot green"></div>
+            <div class="item-info"><div class="item-title">Pharmacie El Baraka</div><div class="item-sub">Doliprane 500mg · 2 boites</div></div>
+            <div class="item-right"><span class="status green">Confirmé</span><div class="item-date">Auj. 10:30</div></div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot blue"></div>
+            <div class="item-info"><div class="item-title">RDV Dr. Benali</div><div class="item-sub">Consultation générale</div></div>
+            <div class="item-right"><span class="status blue">En cours</span><div class="item-date">Dem. 14:00</div></div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot orange"></div>
+            <div class="item-info"><div class="item-title">Garde de nuit</div><div class="item-sub">Pharmacie Centrale — Alger</div></div>
+            <div class="item-right"><span class="status orange">En attente</span><div class="item-date">Hier</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Prochain rendez-vous</span><button class="card-btn" onclick="showTab('calendrier')">Calendrier</button></div>
+        <div class="card-body">
+          <div style="text-align:center;padding:8px 0">
+            <div style="font-size:28px;font-weight:900;color:var(--g3)">Demain</div>
+            <div style="font-size:14px;color:var(--muted);margin-top:4px">Mercredi 30 Avril · 14h00</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-top:6px">Dr. Karim Benali — Généraliste</div>
+            <div style="font-size:11px;color:var(--muted)">Ben Aknoun, Alger</div>
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
+              <button class="i-btn" onclick="showToast('Rappel activé ✓')">Rappel</button>
+              <button class="i-btn red" onclick="showToast('RDV annulé')">Annuler</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Suivi de santé</span><button class="card-btn" onclick="showTab('sante')">Mon suivi</button></div>
+        <div class="card-body">
+          <div class="hw-grid">
+            <div class="hw-card"><div class="hw-label">Poids</div><div class="hw-value">78 <span class="hw-unit">kg</span></div></div>
+            <div class="hw-card"><div class="hw-label">Taille</div><div class="hw-value">1m75</div></div>
+            <div class="hw-card"><div class="hw-label">IMC</div><div class="hw-value" style="color:var(--g3)">25.5</div></div>
+            <div class="hw-card"><div class="hw-label">Tension</div><div class="hw-value">120<span class="hw-unit">/80</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMANDES -->
+    <div class="sec" id="sec-demandes">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Demandes en cours</span><button class="card-btn" onclick="window.location.href='index.html'">+ Nouvelle</button></div>
+        <div class="card-body">
+          <div class="item-row">
+            <div class="item-dot green"></div>
+            <div class="item-info">
+              <div class="item-title">Pharmacie El Baraka</div>
+              <div class="item-sub">Doliprane 500mg · Hydra, Alger</div>
+              <div class="item-actions">
+                <button class="i-btn">Contacter</button>
+                <button class="i-btn">Itinéraire</button>
+                <button class="i-btn red">Annuler</button>
+              </div>
+            </div>
+            <div class="item-right"><span class="status green">Confirmé</span><div class="item-date">Auj. 10:30</div></div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot blue"></div>
+            <div class="item-info">
+              <div class="item-title">RDV Dr. Benali</div>
+              <div class="item-sub">Consultation générale · Ben Aknoun</div>
+              <div class="item-actions">
+                <button class="i-btn">Rappel</button>
+                <button class="i-btn red">Annuler</button>
+              </div>
+            </div>
+            <div class="item-right"><span class="status blue">En cours</span><div class="item-date">Dem. 14h00</div></div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot orange"></div>
+            <div class="item-info">
+              <div class="item-title">Pharmacie de garde</div>
+              <div class="item-sub">Pharmacie Centrale · Nuit</div>
+              <div class="item-actions"><button class="i-btn red">Annuler</button></div>
+            </div>
+            <div class="item-right"><span class="status orange">Attente</span><div class="item-date">Hier</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDRIER -->
+    <div class="sec" id="sec-calendrier">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Calendrier des rendez-vous</span></div>
+        <div class="card-body">
+          <div class="cal-nav-row">
+            <button class="cal-btn" onclick="calShift(-1)">Précédent</button>
+            <span class="cal-month-lbl" id="calMonthLbl"></span>
+            <button class="cal-btn" onclick="calShift(1)">Suivant</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div id="rdvSlots" style="display:none">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Créneaux disponibles</div>
+            <div class="time-slots" id="timeSlots"></div>
+            <button class="rdv-confirm-btn" id="rdvConfirmBtn" style="display:none" onclick="confirmRdv()">Confirmer ce rendez-vous</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECHERCHES -->
+    <div class="sec" id="sec-recherches">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Recherches sauvegardées</span><button class="card-btn" onclick="window.location.href='index.html'">+ Nouvelle</button></div>
+        <div class="card-body">
+          <div class="srch-item"><div class="srch-dot"></div><div class="srch-info"><div class="srch-text">Pharmacie de garde — Alger Centre</div><div class="srch-params">Rayon 5km · Nuit</div></div><div class="srch-btns"><button class="s-btn">Relancer</button><button class="s-btn red">Suppr.</button></div></div>
+          <div class="srch-item"><div class="srch-dot"></div><div class="srch-info"><div class="srch-text">Cardiologue — Hydra</div><div class="srch-params">Rayon 10km</div></div><div class="srch-btns"><button class="s-btn">Relancer</button><button class="s-btn red">Suppr.</button></div></div>
+          <div class="srch-item"><div class="srch-dot"></div><div class="srch-info"><div class="srch-text">Laboratoire d'analyse — Ben Aknoun</div><div class="srch-params">Rayon 3km</div></div><div class="srch-btns"><button class="s-btn">Relancer</button><button class="s-btn red">Suppr.</button></div></div>
+          <div class="srch-item"><div class="srch-dot"></div><div class="srch-info"><div class="srch-text">Parapharmacie — Kouba</div><div class="srch-params">Rayon 5km</div></div><div class="srch-btns"><button class="s-btn">Relancer</button><button class="s-btn red">Suppr.</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAVORIS -->
+    <div class="sec" id="sec-favoris">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Mes favoris</span><button class="card-btn" onclick="window.location.href='index.html'">Explorer</button></div>
+        <div class="card-body">
+          <div class="fav-item"><div class="fav-color pharm">PHAR</div><div class="fav-info"><div class="fav-name">Pharmacie El Baraka</div><div class="fav-type">Pharmacie</div><div class="fav-addr">Hydra · 350m</div></div><button class="fav-remove">Retirer</button></div>
+          <div class="fav-item"><div class="fav-color garde">GARD</div><div class="fav-info"><div class="fav-name">Pharmacie Centrale</div><div class="fav-type">Garde de nuit</div><div class="fav-addr">Alger Centre · 1.2km</div></div><button class="fav-remove">Retirer</button></div>
+          <div class="fav-item"><div class="fav-color clinique">CLIN</div><div class="fav-info"><div class="fav-name">Clinique El Azhar</div><div class="fav-type">Clinique privée</div><div class="fav-addr">Ouled Fayet · 4km</div></div><button class="fav-remove">Retirer</button></div>
+          <div class="fav-item"><div class="fav-color para">PARA</div><div class="fav-info"><div class="fav-name">Parapharmacie Santé+</div><div class="fav-type">Parapharmacie</div><div class="fav-addr">Ben Aknoun · 2.1km</div></div><button class="fav-remove">Retirer</button></div>
+          <div class="fav-item"><div class="fav-color veto">VETO</div><div class="fav-info"><div class="fav-name">Clinique Vétérinaire</div><div class="fav-type">Vétérinaire</div><div class="fav-addr">Cheraga · 3.4km</div></div><button class="fav-remove">Retirer</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="sec" id="sec-messages">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Messagerie</span></div>
+        <div class="card-body">
+          <div class="msg-form">
+            <div class="msg-row"><span class="msg-lbl">Destinataire</span><input class="msg-inp" placeholder="Pharmacie, médecin…"/></div>
+            <div class="msg-row"><span class="msg-lbl">Sujet</span><input class="msg-inp" id="msg-subject" placeholder="Objet…"/></div>
+            <div class="msg-row"><span class="msg-lbl">Message</span><input class="msg-inp" id="msg-body" placeholder="Votre message…"/></div>
+            <div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="msg-send" onclick="sendMsg()">Envoyer</button></div>
+          </div>
+          <div class="msg-item msg-unread"><div class="msg-avatar">PH</div><div class="msg-body"><div class="msg-from">Pharmacie El Baraka</div><div class="msg-text">Votre commande Doliprane est prête à être retirée.</div></div><div class="msg-time">10:30</div></div>
+          <div class="msg-item msg-unread"><div class="msg-avatar">DR</div><div class="msg-body"><div class="msg-from">Dr. Benali</div><div class="msg-text">Confirmation de votre rendez-vous demain à 14h00.</div></div><div class="msg-time">Hier</div></div>
+          <div class="msg-item"><div class="msg-avatar">OD</div><div class="msg-body"><div class="msg-from">ODNIS</div><div class="msg-text">Votre profil a été mis à jour avec succès.</div></div><div class="msg-time">Lun.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDONNANCES -->
+    <div class="sec" id="sec-ordonnances">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Ordonnances</span><button class="card-btn">+ Ajouter</button></div>
+        <div class="card-body">
+          <div class="ord-item"><div class="ord-color" style="background:var(--red)"></div><div class="ord-info"><div class="ord-title">Amlodipine 5mg</div><div class="ord-sub">1 comprimé/jour · Hypertension · Renouvellement dans 14 jours</div></div><span class="status orange" style="flex-shrink:0">Renouveler</span></div>
+          <div class="ord-item"><div class="ord-color" style="background:var(--orange)"></div><div class="ord-info"><div class="ord-title">Metformine 500mg</div><div class="ord-sub">2 comprimés/jour · Pré-diabète · 28 jours</div></div><span class="status green" style="flex-shrink:0">En cours</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Rappels de médicaments</span><button class="card-btn">+ Rappel</button></div>
+        <div class="card-body">
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Amlodipine — 08h00</div><div class="setting-sub">Tous les jours</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Metformine — 12h30 et 19h00</div><div class="setting-sub">Avec les repas</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SANTÉ -->
+    <div class="sec" id="sec-sante">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Suivi de santé</span><button class="card-btn" onclick="openSheet('healthSheet')">Mettre à jour</button></div>
+        <div class="card-body">
+          <div class="hw-grid">
+            <div class="hw-card"><div class="hw-label">Poids</div><div class="hw-value">78 <span class="hw-unit">kg</span></div></div>
+            <div class="hw-card"><div class="hw-label">Taille</div><div class="hw-value">1m75</div></div>
+            <div class="hw-card"><div class="hw-label">IMC</div><div class="hw-value" style="color:var(--g3)">25.5 <span class="hw-unit">Normal</span></div></div>
+            <div class="hw-card"><div class="hw-label">Tension</div><div class="hw-value">120<span class="hw-unit">/80</span></div></div>
+            <div class="hw-card"><div class="hw-label">Glycémie</div><div class="hw-value">0.92 <span class="hw-unit">g/L</span></div></div>
+            <div class="hw-card"><div class="hw-label">Pouls</div><div class="hw-value">72 <span class="hw-unit">bpm</span></div></div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">Informations médicales</div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Groupe sanguin</div><div class="setting-sub">B positif (B+)</div></div></div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Allergies</div><div class="setting-sub">Pénicilline</div></div></div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Maladies chroniques</div><div class="setting-sub">Hypertension artérielle</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFS -->
+    <div class="sec" id="sec-notifs">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Notifications</span><button class="card-btn" onclick="showToast('Tout marqué comme lu')">Tout lire</button></div>
+        <div class="card-body">
+          <div class="notif-item"><div class="notif-dot item-dot green"></div><div class="notif-txt"><div class="notif-title">Commande prête</div><div class="notif-sub">Pharmacie El Baraka — Doliprane prêt</div></div><div class="notif-time">10:30</div></div>
+          <div class="notif-item"><div class="notif-dot item-dot blue"></div><div class="notif-txt"><div class="notif-title">RDV confirmé</div><div class="notif-sub">Dr. Benali — Demain 14h00</div></div><div class="notif-time">Hier</div></div>
+          <div class="notif-item"><div class="notif-dot item-dot orange"></div><div class="notif-txt"><div class="notif-title">Rappel médicament</div><div class="notif-sub">Amlodipine — Ce soir 08h00</div></div><div class="notif-time">Ce soir</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARAMÈTRES -->
+    <div class="sec" id="sec-params">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Paramètres du compte</span></div>
+        <div class="card-body">
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Notifications par e-mail</div><div class="setting-sub">Rappels RDV, confirmations</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Rappels de médicaments</div><div class="setting-sub">Alertes de prise quotidienne</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Alertes pharmacie de garde</div><div class="setting-sub">Nuit et weekend</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Newsletter ODNIS</div><div class="setting-sub">Nouveautés, conseils santé</div></div><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-info"><div class="setting-label">Partager mes données</div><div class="setting-sub">Avec les prestataires de santé</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Compte</span></div>
+        <div class="card-body">
+          <button style="width:100%;background:var(--g3);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:inherit" onclick="window.location.href='create-account-ios.html'">Modifier mon profil</button>
+          <button style="width:100%;background:#fde8e7;color:var(--red);border:1.5px solid #e8b4b0;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit" onclick="confirmLogout()">Déconnexion</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end sections -->
+</div><!-- end scroll-area -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" onclick="window.location.href='index.html'">
+    <svg class="bnav-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="bnav-label">Accueil</span>
+  </button>
+  <button class="bnav-item" onclick="showTab('recherches');bnav(this)">
+    <svg class="bnav-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span class="bnav-label">Recherches</span>
+  </button>
+  <button class="bnav-item active2" onclick="showTab('calendrier');bnav(this)">
+    <svg class="bnav-svg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="bnav-label">Rendez-vous</span>
+  </button>
+  <button class="bnav-item" onclick="showTab('favoris');bnav(this)">
+    <svg class="bnav-svg" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+    <span class="bnav-label">Favoris</span>
+  </button>
+  <button class="bnav-item" onclick="showTab('params');bnav(this)">
+    <svg class="bnav-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="bnav-label">Compte</span>
+  </button>
+</nav>
+
+<!-- HEALTH SHEET -->
+<div class="sheet-overlay" id="healthSheet" onclick="if(event.target===this)closeSheet('healthSheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div class="sheet-title">Mettre à jour mes données</div><button class="sheet-close" onclick="closeSheet('healthSheet')">✕</button></div>
+    <div class="sheet-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">Poids (kg)</div><input style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px;font-size:14px;font-family:inherit;outline:none" type="number" placeholder="78"/></div>
+        <div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">Tension</div><input style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px;font-size:14px;font-family:inherit;outline:none" placeholder="120/80"/></div>
+        <div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">Glycémie (g/L)</div><input style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px;font-size:14px;font-family:inherit;outline:none" type="number" placeholder="0.92"/></div>
+        <div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">Pouls (bpm)</div><input style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px;font-size:14px;font-family:inherit;outline:none" type="number" placeholder="72"/></div>
+      </div>
+      <button style="width:100%;background:linear-gradient(90deg,var(--g1),var(--g2) 50%,var(--g3));color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;font-family:inherit" onclick="showToast('Données de santé mises à jour ✓');closeSheet('healthSheet')">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* TAB NAV */
+let curTab = 'vue';
+function showTab(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  curTab = id;
+}
+function bnav(el){
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* CALENDAR */
+let calYear, calMonth, calSelected=null, calTime=null;
+const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DOW=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+const RDV_DATES=[new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()+1)];
+const SLOTS=['08:30','09:00','10:00','10:30','11:00','14:00','14:30','15:00','16:00','16:30'];
+
+function initCal(){
+  const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth();
+  renderCal();
+}
+function calShift(d){
+  calMonth+=d;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  calSelected=null; calTime=null; renderCal();
+  document.getElementById('rdvSlots').style.display='none';
+  document.getElementById('rdvConfirmBtn').style.display='none';
+}
+function renderCal(){
+  document.getElementById('calMonthLbl').textContent=MOIS[calMonth]+' '+calYear;
+  const g=document.getElementById('calGrid'); g.innerHTML='';
+  DOW.forEach(d=>{const el=document.createElement('div');el.className='cal-dow';el.textContent=d;g.appendChild(el);});
+  const first=(new Date(calYear,calMonth,1).getDay()+6)%7;
+  const dim=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  for(let i=0;i<first;i++){const el=document.createElement('div');el.className='cal-day empty';g.appendChild(el);}
+  for(let d=1;d<=dim;d++){
+    const el=document.createElement('div'); el.className='cal-day'; el.textContent=d;
+    const dt=new Date(calYear,calMonth,d);
+    if(dt<today){el.classList.add('past');}
+    else{
+      if(dt.toDateString()===today.toDateString()) el.classList.add('today');
+      if(calSelected&&dt.toDateString()===calSelected.toDateString()) el.classList.add('selected');
+      if(RDV_DATES.some(r=>r.toDateString()===dt.toDateString())) el.classList.add('has-rdv');
+      el.addEventListener('click',()=>selectDay(dt));
+    }
+    g.appendChild(el);
+  }
+}
+function selectDay(dt){
+  calSelected=dt; calTime=null; renderCal();
+  const sl=document.getElementById('rdvSlots'); sl.style.display='block';
+  document.getElementById('rdvConfirmBtn').style.display='none';
+  const ts=document.getElementById('timeSlots'); ts.innerHTML='';
+  SLOTS.forEach(s=>{
+    const b=document.createElement('button'); b.className='tslot'; b.textContent=s;
+    b.addEventListener('click',()=>{document.querySelectorAll('.tslot').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');calTime=s;document.getElementById('rdvConfirmBtn').style.display='block';});
+    ts.appendChild(b);
+  });
+}
+function confirmRdv(){
+  if(!calSelected||!calTime)return;
+  showToast('RDV confirmé — '+calSelected.getDate()+' '+MOIS[calSelected.getMonth()]+' à '+calTime+' ✓');
+  document.getElementById('rdvConfirmBtn').style.display='none';
+}
+initCal();
+
+/* MSG */
+function sendMsg(){
+  const s=document.getElementById('msg-subject').value;
+  const b=document.getElementById('msg-body').value;
+  if(!s||!b){showToast('Remplissez tous les champs');return;}
+  showToast('Message envoyé ✓');
+  document.getElementById('msg-subject').value='';
+  document.getElementById('msg-body').value='';
+}
+
+/* SHEETS */
+function openSheet(id){document.getElementById(id).classList.add('open');}
+function closeSheet(id){document.getElementById(id).classList.remove('open');}
+
+/* SAMU */
+function callSamu(){showToast('Appel SAMU — 14…');setTimeout(()=>{window.location.href='tel:14';},400);}
+
+/* LOGOUT */
+function confirmLogout(){
+  if(confirm('Voulez-vous vous déconnecter ?')) window.location.href='index.html';
+}
+
+/* TOAST */
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('/ODNIS-IOS/service-worker.js').catch(()=>{})); }
+</script>
+</body>
+</html>
